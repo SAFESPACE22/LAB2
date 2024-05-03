@@ -1,0 +1,420 @@
+---
+title: "Project2PP"
+author: "Tyler Vuong"
+date: "`r Sys.Date()`"
+output:
+  beamer_presentation: default
+  powerpoint_presentation: default
+---
+
+```{r}
+library(s20x)
+library(ggplot2)
+```
+
+# Introduction
+
+Water distribution networks rely heavily on pipes to function effectively. These networks distribute clean water to various structures, including homes and businesses. Pipes serve as the essential conduits, carrying water throughout the system to meet our daily needs for activities like showering, laundry, and sanitation.
+
+![Water Distribution](waterDistribution.jpg){width=60%} 
+
+[@pic1]
+
+Over time, water pipes can develop leaks and breakages due to various factors. As a consequence, system efficiency significantly declines, and malfunctioning pipes pose a risk to public health and safety (Zangenehmadar).
+
+![Bad Pipe](badPipe.jpg){width=60%}
+
+[@pic2]
+
+In the event of a water pipe malfunction, engineers must weigh the options of repairing the broken pipe versus replacing it entirely.
+
+There are several factors to consider when deciding between repair and replacement, each with its own benefits and drawbacks. For instance, some engineers may favor repairs due to their lower short-term costs. However, over time, repeated repairs might make replacement a more viable long-term option [@RepairReplacePipes].
+
+Given the multitude of factors involved, conducting a thorough analysis before making a decision is advisable.
+
+## Why this Data Set?
+
+In my living space, I've come across numerous notifications emphasizing the precautions necessary to prevent pipe damage. Moreover, I've delved into various publications shedding light on the ramifications of faulty water conduits on both local and national infrastructure. As a computer scientist, I'm keen on delving deeper into enhancing the efficiency of our water distribution systems and incorporating more rigorous cost-benefit analyses into our methodologies.
+
+## The Data
+
+In 2012, a group of civil engineers conducted a study involving 13 different pipe sizes. They recorded the diameter of these pipes (in millimeters) and calculated the ratio between the cost of repair and the cost of replacement. The purpose was to gain insights into whether repairing or replacing a broken pipe would be more efficient [@statsbook].
+
+We aim to utilize this data to discern any potential statistical correlations between the diameter of these pipes and their repair or replacement rates.
+
+```{r}
+pipes = read.csv("WATERPIPE.csv", header=TRUE)
+head(pipes)
+```
+
+## Plots
+
+```{r}
+pairs20x(pipes)
+
+g = ggplot(pipes, aes(x = DIAMETER, y = RATO)) + geom_point()
+g = g + geom_smooth(formula = y~x, method = "loess")
+g
+```
+
+
+## Analyzing this Dataset
+
+At first glance, these plots suggest a consistent and linear correlation between the variables under consideration. However, a thorough statistical analysis is essential to determine the exact magnitude and scope of this relationship.
+
+# Theoretical Basis of SLR
+
+I posit the presence of a positive, linear relationship between the diameter of a pipe (X) and its repair/replacement cost ratio (Y). In essence, when a broken pipe exhibits a larger diameter, it tends to entail a higher repair/replacement cost ratio. To elucidate this relationship, I will construct a model that correlates these variables through a line of best fit, with pipe diameter serving as the independent variable and repair/replacement cost ratio as the dependent variable.
+
+Upon scrutinizing our preliminary plots, it becomes apparent that a deterministic linear model fails to fully encompass all data points, owing to their lack of complete alignment. Hence, I advocate for a probabilistic approach, better suited to accommodate the inherent random variation within the dataset. Specifically, we will employ the Simple Linear Regression Model (SLR) for our analysis.
+
+SLR operates under the assumption that the mean value of Y for a given X forms a linear relationship, with any deviations attributed to random error ($\epsilon_i$). This relationship is represented as follows:
+
+\begin{}
+    Y=\beta_0+\beta_1 \; * \; x_i+\epsilon_i
+\end{}
+
+
+
+Here, $\beta_0$ and $\beta_1$ represent unknown constants, where $\beta_0 + \beta_1 \cdot x_i$ signifies the mean of the Y values, and $\epsilon_i$ denotes the random error. Given the expectation of both positive and negative deviations in our random error, we assume their cancellation, resulting in $E(\epsilon) = 0$.
+
+Consequently, the mean value of Y is given by:
+
+\begin{align*}
+  E(Y) = E(\beta_0 + \beta_1 \;* \; x_i + \epsilon_i) \\
+  E(Y) = \beta_0 + \beta_1 \; * \; x_i + E(\epsilon_i) \\
+  E(Y) = \beta_0 + \beta_1 \; * \; x_i
+\end{align*}
+ 
+Thus, the mean value for Y can be represented by
+E(Y∣x), assuming the shape of a straight line. Here, the y-intercept is denoted by $\beta_0$, and the slope is represented by $\beta_1$.
+
+To estimate the values of $\beta_0$ and $\beta_1$, we must make assumptions regarding the probability distribution of the error, which are based on the sampling distributions of the estimators. These assumptions regarding the random error $\epsilon$ are as follows:
+
+The mean of the probability distribution of $\epsilon$ is 0.
+The variance of the probability distribution of $\epsilon$ remains constant across all values of the independent variable. For our linear model, this implies that Var($\epsilon$) is constant for all values of X.
+The probability distribution of $\epsilon$ conforms to a normal distribution.
+Errors associated with different observations are independent.
+
+# Estimation of the Parameters
+
+To derive values for $\beta_0$ and $\beta_1$, we employ the method of least squares to ascertain the optimal fit line for our dataset. This method seeks to minimize the sum of squares of the deviations, commonly referred to as the Sum of Squares for Error (SSE) value.
+
+Our estimator is formulated as $\hat{y} = \hat{\beta_0} + \hat{\beta_1}x_i$, while the actual Y value is denoted as $y_i$. Consequently, our SSE equation is expressed as:
+
+\begin{align*}
+\sum_{i=1}^n [y_i - (\hat{y})]^2 = \sum_{i=1}^n [y_i - (\hat{\beta_0} + \hat{\beta_1} x_i)]^2
+\end{align*}
+
+A well-fitting model is characterized by residual values that approximate a normal distribution, exhibit a mean of $0$, and maintain constant variance.
+
+## Method of Least Squares
+
+```{r}
+pipes.lm = lm(RATO~DIAMETER, data = pipes)
+summary(pipes.lm)
+```
+
+From the provided summary, we get the following estimates for 
+$\beta_0 = 6.6781993$ and $\beta_1 = 0.0047856$:
+
+Our equation is as follows:
+
+\begin{align*}
+  \hat{y} = \hat{\beta_0} + \hat{\beta_1} \; * \; x_i \\
+  \hat{y} = 6.6782 + 0.0048 \; * \; x_i \\
+\end{align*}
+
+From this equation, we observe that the slope ($\hat{\beta_1}$) is $0.0047856$.
+This means that for every 1.00 millimeter that the pipe's diameter increase, it 
+is projected for the corresponding pipe's repair/replace cost ratio will increase
+by approximately $0.0048$. This interpretation is valid for the entirety of the
+range of pipe diameter values.
+
+## Confidence Interval
+
+```{r}
+ciReg(pipes.lm, conf.level = 0.95, print.out=TRUE)
+```
+
+
+# Verifying if SLR is fit for data
+
+```{r}
+with(pipes, plot(RATO~DIAMETER, bg = "red", pch = 21, cex = 1.2, 
+                  xlim = c(0, 1.1 * max(DIAMETER)), ylim = c(0, 1.1 * max(RATO)),
+                  xlab = "Pipe Diameter", ylab = "Repair/Replace Cost Ratio",
+                  main = "Pipe Diameter vs Repair/Replace Cost Ratio"))
+
+abline(pipes.lm)
+```
+
+The scatter plot suggests that our linear model fits the data well. Nevertheless, further tests are needed to confirm its optimal suitability.
+
+## Plot of Residuals
+
+Plotting our residuals, the disparities between our data points and the model become evident. These residuals are pivotal in computing the Residual Sum of Squares (RSS), essential for deriving the $R^2$ value, a key metric for evaluating our linear model.
+
+```{r}
+with(pipes, plot(RATO~DIAMETER, bg = "red", pch = 21, cex = 1.2, 
+                  xlim = c(0, 1.1 * max(DIAMETER)), ylim = c(0, 1.1 * max(RATO)),
+                  xlab = "Pipe Diameter", ylab = "Repair/Replace Cost Ratio",
+                  main = "Residual Line Segments of Diameter vs Repair/Replace Cost Ratio"))
+
+abline(pipes.lm)
+
+with(pipes,{segments(DIAMETER,RATO,DIAMETER, fitted(pipes.lm))})
+```
+
+## Plot of Means
+
+Following that, we can visualize the mean of the repair/replace ratio data alongside the fitted line and observe the deviations between this mean and the linear model. This comparison allows us to compute the Model Sum of Squares (MSS).
+
+```{r}
+with(pipes, plot(RATO~DIAMETER, bg = "red", pch = 21, cex = 1.2, 
+                  xlim = c(0, 1.1 * max(DIAMETER)), ylim = c(0, 1.1 * max(RATO)),
+                  xlab = "Pipe Diameter", ylab = "Repair/Replace Cost Ratio",
+                  main = "Mean of Diameter vs Repair/Replace Cost Ratio"))
+
+abline(h=mean(pipes$RATO))
+abline(pipes.lm)
+
+with(pipes, segments(DIAMETER,mean(RATO),DIAMETER,fitted(pipes.lm),col="Red"))
+```
+
+## Mean Deviation Plots
+
+Subsequently, we graph the mean of the repair/replace cost ratio against the pipe diameter data, highlighting the deviations between these variables. The total deviation line segments represent $\hat{y} = \bar{y}$, serving as a basis for calculating the Total Sum of Squares (TSS).
+
+```{r}
+with(pipes, plot(RATO~DIAMETER, bg = "red", pch = 21, cex = 1.2, 
+                  xlim = c(0, 1.1 * max(DIAMETER)), ylim = c(0, 1.1 * max(RATO)),
+                  xlab = "Pipe Diameter", ylab = "Repair/Replace Cost Ratio",
+                  main = "Total Deviation Line Segments of Diameter vs Repair/Replace Cost Ratio"))
+
+abline(h=mean(pipes$RATO))
+
+with(pipes, segments(DIAMETER,mean(RATO),DIAMETER,RATO,col="Green"))
+```
+
+## Examining RSS, MSS, and TSS Values
+
+```{r}
+RSS = with(pipes, sum((RATO - fitted(pipes.lm))^2))
+RSS
+```
+
+```{r}
+MSS = with(pipes, sum((mean(RATO) - fitted(pipes.lm))^2))
+MSS
+```
+
+```{r}
+TSS = with(pipes, sum((RATO - mean(RATO))^2))
+TSS
+```
+
+Once we've computed the RSS, MSS, and TSS values, we'll calculate the $\frac{MSS}{TSS}$ ratio. This ratio corresponds to the $R^2$ value, offering insights into the accuracy of the trend line. The closer this value approaches 1 on a scale from 0 to 1, the stronger the fit.
+
+```{r}
+MSS/TSS
+```
+
+As seen here, we can see that the linear model is a good fit for our data set.
+
+```{r}
+# Linear Model 
+pipes.lm = lm(RATO~DIAMETER, data = pipes)
+
+#Residuals for Linear Model
+pipes.res = residuals(pipes.lm)
+
+#Fitted Values for Linear Model
+```
+
+### Diameter vs Residuals
+
+```{r}
+pipes.fit = fitted(pipes.lm)
+plot(pipes$DIAMETER, pipes.res, xlab="DIAMETER",ylab="RESIDUALS",
+     ylim=c(1.5*min(pipes.res),-1.5*min(pipes.res)),
+     xlim=c(0,1.6*max(pipes$DIAMETER)), main="Diameter vs Residuals")
+```
+
+While we notice that the positive and negative values of these residuals cancel each other out around the y-axis, there are discernible outliers present within our dataset.
+
+### Residuals vs Fitted Values
+
+```{r}
+trendscatter(pipes.res~pipes.fit, f = 0.5, data = pipes.lm, xlab="Fitted Values",ylab="Residuals",ylim=c(1.1*min(pipes.res),-1.1*min(pipes.res)),
+             xlim=c(6,1.1*max(pipes.fit)), main="Residuals vs Fitted Values")
+```
+
+We see some general uniformity around 0.0 for our linear model, but
+we will need to examine further to see if it is the best fit for our data set.
+
+### Check Normality
+
+```{r}
+normcheck(pipes.lm, shapiro.wilk = TRUE)
+```
+
+The Null Hypothesis posited in this case was that our error followed a normal distribution:
+
+\begin{align*}
+\epsilon \sim N(0, \sigma^2)
+\end{align*}
+
+Following the Shapiro-Wilk test, our calculated $p$ value is 0.089. As this value surpasses our predetermined threshold ($p = 0.05$), we do not reject the null hypothesis. Hence, we can infer that our error conforms to a normal distribution
+
+# Testing the Quadratic Model
+
+To ensure the optimal fit for our data, we'll explore various model types. Specifically, we will assess a quadratic model defined by the equation:
+
+\begin{align*}
+y_i = \beta_0 + \beta_1 x_i + \beta_2 x_i^2
+\end{align*}
+
+## Quadratic Model
+
+```{r}
+pipesQuad.lm = lm(RATO~DIAMETER + I(DIAMETER^2), data = pipes)
+
+quadPlot = function(x){
+  pipesQuad.lm$coef[1] + pipesQuad.lm$coef[2]*x + pipesQuad.lm$coef[3]*x^2
+}
+
+with(pipes, plot(RATO~DIAMETER, bg = "red", pch = 21, cex = 1.2, 
+                  xlim = c(0, 1.1 * max(DIAMETER)), ylim = c(0, 1.1 * max(RATO)),
+                  xlab = "Pipe Diameter", ylab = "Repair/Replace Cost Ratio",
+                  main = "Quadratic Model for Pipe Diameter vs Repair/Replace Cost Ratio"))
+
+curve(quadPlot, lwd = 2, add = TRUE)
+```
+
+Upon closer inspection of this new quadratic curve, its nature seems predominantly linear. Nonetheless, comprehensive analysis of both this model and our previous linear model is warranted.
+
+## Residuals vs Fitted Values 
+
+```{r}
+pipesQuad.fit = fitted(pipesQuad.lm)
+
+plot(pipesQuad.lm, which = 1)
+```
+
+Upon reviewing this plot, we observe a symmetrical distribution around the y-axis value of $0$. Furthermore, there are noticeable outliers at points $1$, $3$, and $4$. Despite these outliers, the quadratic model maintains a linear appearance.
+
+## RSS, MSS, and TSS Values 
+
+```{r}
+RSSquad = with(pipes, sum((RATO - fitted(pipesQuad.lm))^2))
+RSSquad
+```
+
+```{r}
+MSSquad = with(pipes, sum((mean(RATO) - fitted(pipesQuad.lm))^2))
+MSSquad
+```
+
+```{r}
+TSSquad = with(pipes, sum((RATO - mean(RATO))^2))
+TSSquad
+```
+
+```{r}
+MSSquad / TSSquad
+```
+
+As seen here, the quadratic model is also a good fit for our data.
+
+## Check Normality
+
+```{r}
+normcheck(pipesQuad.lm, shapiro.wilk = TRUE)
+```
+
+The $p$ value for our quadratic model is $0.86$, markedly exceeding our comparison standard of $p = 0.05$. Consequently, we refrain from rejecting the Null Hypothesis, thereby indicating that the error follows a normal distribution.
+
+## Summary of Quadratic Model
+
+```{r}
+summary(pipesQuad.lm)
+```
+
+As observed by the provided summary, we get the following estimates
+$\beta_0 = 6.266$, $\beta_1 = 7.914 * 10^{-3}$, and $beta_2 = -4.256 * 10^{-6}$:
+
+Thus, our equation is as follows:
+
+\begin{align*}
+y_i = 6.266 + 7.914 * 10^{-3} \; * \; x_i - 4.256 * 10^{-6} \; * \;  x_i^2
+\end{align*}
+
+## Confidence Interval for Parameter Estimates
+
+```{r}
+ciReg(pipesQuad.lm, conf.level = 0.95, print.out = TRUE)
+```
+
+# Comparing Models
+
+## Making Predictions with Both models
+
+To test out both models, we use them to make predictions when the pipe diameter
+is 200, 300, and 400 millimeters.
+
+* Linear Model
+
+```{r}
+linearPredict = predict(pipes.lm, data.frame(DIAMETER = c(200,300,400)))
+linearPredict
+```
+
+* Quadratic Model
+
+```{r}
+quadPredict = predict(pipesQuad.lm, data.frame(DIAMETER = c(200,300,400)))
+quadPredict
+```
+
+While the quadratic model forecasts higher values compared to the linear model, both sets of predictions closely align with the actual values present in the dataset. Further analysis is imperative to determine the optimal model fit.
+
+## $R^2$ values
+
+The multiple $R^2$ value for the linear model stands at 0.9526, with an adjusted $R^2$ value of 0.9483. In contrast, the quadratic model exhibits a multiple $R^2$ value of 0.9768 and an adjusted $R^2$ value of 0.9722.
+
+Given that the adjusted $R^2$ value is superior with the quadratic model, we designate it as the most suitable fit for our dataset.
+
+# Bias and Outliers with Cook's Distance
+
+Cook’s Distance is instrumental in outlier analysis and bias mitigation. It operates on the principle of assessing the repercussions of eliminating individual data points. Through the removal of the outlier data point exerting the most substantial influence, the chosen model is anticipated to demonstrate enhanced accuracy in fitting the dataset.
+
+```{r}
+cooks20x(pipesQuad.lm)
+```
+
+As depicted in the subsequent plot, our initial data point exhibits the highest Cook's Distance value. Subsequently, we will generate a duplicate of our original dataset, excluding this specific data point. This refined dataset will serve as the foundation for constructing a fresh quadratic model.
+
+```{r}
+pipesQuadExclude.lm = lm(RATO~DIAMETER + I(DIAMETER^2), data = pipes[-1,])
+
+summary(pipesQuadExclude.lm)
+```
+
+In contrast to the prior quadratic model, the adjusted $R^2$ value of the updated model has increased ($0.9803 > 0.9722$). Consequently, it's evident that this new model offers greater accuracy.
+
+# Conclusion
+
+Ensuring the integrity of pipes in a water distribution network is paramount, given their substantial influence on overall infrastructure. Given this criticality, it's imperative to ascertain the most efficient method for repairing these networks in the event of pipe malfunctions.
+
+## Research Question and Results
+
+Based on the data pertaining to pipe diameter and the pipe repair/replace cost ratio, our objective was to ascertain if a statistical relationship existed between these variables. Furthermore, if such a relationship existed, we aimed to identify its nature, whether linear or quadratic.
+
+Following our Simple Linear Regression (SLR) analysis, we determined that a quadratic model provided the optimal fit for our dataset. This choice was substantiated by its alignment with the assumptions of the SLR model and its superior model accuracy. Armed with this insight, we can enhance our ability to predict the repair/replace cost ratio for these pipes. This predictive capability, when combined with further data analysis on water pipes, holds the potential to facilitate the development of a more efficient water distribution network.
+
+## Suggestions Going Forward
+
+To enhance our quadratic model, we could consider removing multiple additional outliers identified through the Cook's Distance plot. Moreover, augmenting our dataset with more data points could significantly boost model accuracy. For instance, by incorporating additional data, we could explore diverse statistical relationships that might emerge concerning various pipe materials.
+
+# References
