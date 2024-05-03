@@ -8,10 +8,10 @@
 #' @export
 #'
 #' @examples
-#' myclt(5, 1000)
+#' myclt(n=10, iter = 10000)
 myclt = function(n, iter) {
   y = runif(n * iter, 0, 5) # A
-  data = matrix(y, nr = n, nc = iter, byrow = TRUE) # B
+  data = matrix(y, nr = n, nc = iter, byrow = TRUE); # B - Suppress output
   sm = apply(data, 2, sum) # C
   hist(sm)
   return(sm)

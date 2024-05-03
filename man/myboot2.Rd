@@ -2,29 +2,31 @@
 % Please edit documentation in R/myboot2.R
 \name{myboot2}
 \alias{myboot2}
-\title{Bootstrap Function}
+\title{Title}
 \usage{
 myboot2(iter = 10000, x, fun = "mean", alpha = 0.05, cx = 1.5, ...)
 }
 \arguments{
-\item{iter}{Number of iterations for bootstrap resampling.}
+\item{iter}{number of iterations}
 
-\item{x}{Vector of data values.}
+\item{x}{sample}
 
-\item{fun}{Function to apply on the bootstrap samples (default is "mean").}
+\item{fun}{population}
 
-\item{alpha}{Confidence level (default is 0.05).}
+\item{alpha}{percentage of bootstrap interval}
 
-\item{cx}{Expansion factor for text size (default is 1.5).}
+\item{cx}{character size}
 
-\item{...}{Additional arguments to be passed to plotting functions.}
+\item{...}{any number of arguments}
 }
 \value{
-A list containing the confidence interval (ci), applied function (fun), and original data (x).
+bootstrap function to make a number of plots, point
+and interval estimates and useful output in the form of a list.
 }
 \description{
-This function performs bootstrap resampling to estimate a statistic and visualize the results using a histogram.
+Title
 }
 \examples{
-myboot2(iter = 10000, x = my_data, fun = "median", alpha = 0.01, cx = 1.2)
+samA=rnorm(25,mean=25,sd=10)
+myboot2(iter=10000,alpha=0.05,samA, cx=1.5,xlab="mean")
 }

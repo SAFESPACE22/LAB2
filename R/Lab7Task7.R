@@ -1,10 +1,10 @@
-#' Fire data
+#' fire data
 #'
 #'
-#' @format ## `Fire`
-#' A data frame with 15 rows and 60 columns:
+#' @format ## fire
+#' A data frame with 15 rows and 3 columns:
 #' \describe{
 #'   \item{Distance}{Damage}
 #'
 #' }
-
+"fire"

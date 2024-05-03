@@ -20,5 +20,5 @@ Title
 Generate samples using Central Limit Theorem
 }
 \examples{
-myclt(5, 1000)
+myclt(n=10, iter = 10000)
 }
